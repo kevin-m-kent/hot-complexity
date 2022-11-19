@@ -9,6 +9,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "330223a1aecc308757b9926e9391c9b47f8ef2dbd8aea9df88312aea18c5e8d6"
 
 [[package]]
+name = "anyhow"
+version = "1.0.66"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "216261ddc8289130e551ddcd5ce8a064710c0d064a4d2895c67151c92b5443f6"
+
+[[package]]
 name = "approx"
 version = "0.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -106,6 +112,18 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ef8ae57c4978a2acd8b869ce6b9ca1dfe817bff704c220209fdef2c0b75a01b9"
 
 [[package]]
+name = "cv-convert"
+version = "0.21.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "127a8cef7a0395b2d2d484f7251d3902fbd9f7954d227f5995e94c11e985721b"
+dependencies = [
+ "anyhow",
+ "half",
+ "num-traits",
+ "slice-of-array",
+]
+
+[[package]]
 name = "either"
 version = "1.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -123,6 +141,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "half"
+version = "1.8.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "eabb4a44450da02c90444cf74558da904edde8fb4e9035a9a6a4e15445af0bd7"
+
+[[package]]
 name = "hermit-abi"
 version = "0.1.19"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -135,6 +159,7 @@ dependencies = [
 name = "hot-complexity"
 version = "0.1.0"
 dependencies = [
+ "cv-convert",
  "imageproc",
  "itertools",
  "ndarray",
@@ -455,6 +480,12 @@ dependencies = [
  "paste",
  "wide",
 ]
+
+[[package]]
+name = "slice-of-array"
+version = "0.3.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a4f120bb98cb4cb0dab21c882968c3cbff79dd23b46f07b1cf5c25044945ce84"
 
 [[package]]
 name = "ttf-parser"

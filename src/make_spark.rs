@@ -37,7 +37,7 @@ pub fn make_probability_array(l: &u16) -> Array2::<f64> {
     for (i_test, j_test) in iproduct!(0..*l, 0..*l){
         
         prob_result = normalized_prob(i_test as i16, j_test as i16, &l, &total);
-        prob_array[[i_test as usize, j_test as usize]] = prob_result
+        prob_array[[i_test as usize, j_test as usize]] = prob_result;
     }
 
     prob_array

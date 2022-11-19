@@ -9,6 +9,7 @@ fn main() {
    let total = prob_total(&l);
    let res = normalized_prob(0, 0, &l, &total);
    let prob_array = make_probability_array(&l);
-   let mut starting_arr = Array2::<f64>::zeros((l as usize, l as usize));
+   let mut starting_arr = Array2::<i64>::zeros((l as usize, l as usize));
+   starting_arr[[0,0]] = 1;
    println!("prob: {}", prob_array[[0, 0]])
 }

@@ -45,6 +45,8 @@ pub fn make_probability_array(l: &u16) -> Array2::<f64> {
 
 }
 
+//implementation from https://stackoverflow.com/questions/56762026/how-to-save-ndarray-in-rust-as-image
+
 pub fn array_to_image(arr: Array2<i64>) -> ImageBuffer<Luma<i64>, Vec<i64>> {
     assert!(arr.is_standard_layout());
 

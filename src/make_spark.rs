@@ -1,8 +1,9 @@
 //mod std::f64::consts;
 use std::f64::consts::E;
 use itertools::iproduct; 
-//use imageproc::region_labelling::{connected_components, Connectivity};
-use ndarray::{Array2};
+use imageproc::region_labelling::{connected_components, Connectivity};
+use ndarray::{Array2, Array3, arr2, ArrayView1, ArrayView3};
+use image::{GrayImage, ImageBuffer, Luma};
 
 fn prob_spark(i: i16, j: i16, l: &u16) -> f64 {
     let l = l/10;
@@ -41,6 +42,27 @@ pub fn make_probability_array(l: &u16) -> Array2::<f64> {
     }
 
     prob_array
+
+}
+
+pub fn array_to_image(arr: Array2<i64>) -> ImageBuffer<Luma<i64>, Vec<i64>> {
+    assert!(arr.is_standard_layout());
+
+    let (height, width) = arr.dim();
+    let raw = arr.into_raw_vec();
+
+    ImageBuffer::<Luma<i64>, Vec<i64>>::from_raw(width as u32, height as u32, raw)
+        .expect("container should have the right size for the image dimensions")
+} 
+
+pub fn get_connected_from_arr(arr: Array2<i64>, l: u16) -> Array2<u32> {
+
+    let image = array_to_image(arr);
+    let background_color = Luma([0i64]);
+    let connected = connected_components(&image, Connectivity::Four, background_color);
+    let connected_raw = connected.as_raw();
+    
+    return Array2::from_shape_vec((l as usize, l as usize), connected_raw.to_vec()).unwrap()
 
 }
 

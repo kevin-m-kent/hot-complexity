@@ -1,8 +1,8 @@
 use std::f64::consts::E;
 use itertools::iproduct; 
 use imageproc::region_labelling::{connected_components, Connectivity};
-use ndarray::{Array2, Array3, arr2, ArrayView1, ArrayView3};
-use image::{GrayImage, ImageBuffer, Luma};
+use ndarray::{Array2};
+use image::{ImageBuffer, Luma};
 use std::collections::HashMap;
 
 fn prob_spark(i: i16, j: i16, l: &u16) -> f64 {

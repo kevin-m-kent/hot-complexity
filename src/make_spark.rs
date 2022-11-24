@@ -1,9 +1,9 @@
-//mod std::f64::consts;
 use std::f64::consts::E;
 use itertools::iproduct; 
 use imageproc::region_labelling::{connected_components, Connectivity};
 use ndarray::{Array2, Array3, arr2, ArrayView1, ArrayView3};
 use image::{GrayImage, ImageBuffer, Luma};
+use std::collections::HashMap;
 
 fn prob_spark(i: i16, j: i16, l: &u16) -> f64 {
     let l = l/10;
@@ -55,14 +55,22 @@ pub fn array_to_image(arr: Array2<i64>) -> ImageBuffer<Luma<i64>, Vec<i64>> {
         .expect("container should have the right size for the image dimensions")
 } 
 
-pub fn get_connected_from_arr(arr: Array2<i64>, l: u16) -> Array2<u32> {
+pub fn get_connected_from_arr(arr: Array2<i64>, l: u16) -> (HashMap<u32, usize>, Array2<u32>) {
 
     let image = array_to_image(arr);
     let background_color = Luma([0i64]);
     let connected = connected_components(&image, Connectivity::Four, background_color);
     let connected_raw = connected.as_raw();
+
+    let mut m: HashMap<u32, usize> = HashMap::new();
+    for x in connected_raw {
+        *m.entry(*x).or_default() += 1;
+    }
+
+    let connected_comps = Array2::from_shape_vec((l as usize, l as usize), connected_raw.to_vec()).unwrap();
+
+    return (m, connected_comps)
     
-    return Array2::from_shape_vec((l as usize, l as usize), connected_raw.to_vec()).unwrap()
 
 }
 

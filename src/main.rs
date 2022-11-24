@@ -20,6 +20,6 @@ fn main() {
    starting_arr[[1,0]] = 1;
    starting_arr[[2,0]] = 1;
    starting_arr[[4,0]] = 1;
-   let test_arr = get_connected_from_arr(starting_arr, l);
-   println!("conencted obj: {}", test_arr)
+   let (comp_size_hash, labeled_arr) = get_connected_from_arr(starting_arr, l);
+   println!("conencted obj: {:?}", comp_size_hash)
 }

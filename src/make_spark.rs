@@ -47,24 +47,25 @@ pub fn make_probability_array(l: &u16) -> Array2::<f64> {
 
 //implementation from https://stackoverflow.com/questions/56762026/how-to-save-ndarray-in-rust-as-image
 
-pub fn array_to_image(arr: Array2<i64>) -> ImageBuffer<Luma<i64>, Vec<i64>> {
+pub fn array_to_image(arr: Array2<u32>) -> ImageBuffer<Luma<u32>, Vec<u32>> {
     assert!(arr.is_standard_layout());
 
     let (height, width) = arr.dim();
     let raw = arr.into_raw_vec();
 
-    ImageBuffer::<Luma<i64>, Vec<i64>>::from_raw(width as u32, height as u32, raw)
+    ImageBuffer::<Luma<u32>, Vec<u32>>::from_raw(width as u32, height as u32, raw)
         .expect("container should have the right size for the image dimensions")
 } 
 
-pub fn get_connected_from_arr(arr: Array2<i64>, l: u16) -> (HashMap<u32, usize>, Array2<u32>) {
+pub fn get_connected_from_arr(arr: Array2<u32>, l: u16) -> (HashMap<u32, usize>, Array2<u32>) {
 
     let image = array_to_image(arr);
-    let background_color = Luma([0i64]);
+    let background_color = Luma([0u32]);
     let connected = connected_components(&image, Connectivity::Four, background_color);
     let connected_raw = connected.as_raw();
 
     let mut m: HashMap<u32, usize> = HashMap::new();
+
     for x in connected_raw {
         *m.entry(*x).or_default() += 1;
     }
@@ -74,6 +75,52 @@ pub fn get_connected_from_arr(arr: Array2<i64>, l: u16) -> (HashMap<u32, usize>,
     return (m, connected_comps)
     
 
+}
+
+pub fn get_spark_avg_yield(arr: Array2<u32>, l: u16, prob_arr: Array2::<f64>) ->  f64 {
+
+    let total_trees = &arr.sum();
+    let (mut comp_size_hash, labeled_arr) = get_connected_from_arr(arr, l);
+    let mut burn_square = Array2::<f64>::zeros((l as usize, l as usize));
+
+    for (i_test, j_test) in iproduct!(0..l, 0..l){ 
+
+        let i_test_u = i_test as i16;
+        let j_test_u = j_test as i16;
+        let l_u = l as i16;
+        let mut v = vec![(i_test_u, j_test_u),(i_test_u + 1, j_test_u), (i_test_u - 1, j_test_u),
+                     (i_test_u, j_test_u + 1), (i_test_u, j_test_u - 1)];
+        v.retain(|&i |(i.0 < l_u && i.1 < l_u && i.0 >= 0 && i.1 >= 0));
+        let mut grps_present: HashMap<u32, usize> = HashMap::new();
+        for elem in v {
+
+            let grp = labeled_arr[[elem.0 as usize, elem.1 as usize]];
+            let mut size = comp_size_hash.get(&grp).unwrap();
+            *grps_present.entry(grp).or_default() = *size;
+
+
+        }
+
+        let mut burn_total = 0;
+
+        grps_present.remove(&0);
+
+        let grps_vals = grps_present.values();
+
+        for val in grps_vals {
+
+            burn_total += val;
+
+        }
+
+        burn_square[[i_test as usize, j_test as usize]] = burn_total as f64;
+
+
+    }
+
+    let burn_prob = burn_square*prob_arr;
+
+    return (*total_trees as f64)/(l as f64*l as f64) - burn_prob.sum()/(l as f64*l as f64)
 }
 
 

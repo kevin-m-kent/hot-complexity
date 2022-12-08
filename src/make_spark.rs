@@ -4,6 +4,7 @@ use imageproc::region_labelling::{connected_components, Connectivity};
 use ndarray::{Array2};
 use image::{ImageBuffer, Luma};
 use std::collections::HashMap;
+use rand::Rng; 
 
 fn prob_spark(i: i16, j: i16, l: &u16) -> f64 {
     let l = l/10;
@@ -47,17 +48,18 @@ pub fn make_probability_array(l: &u16) -> Array2::<f64> {
 
 //implementation from https://stackoverflow.com/questions/56762026/how-to-save-ndarray-in-rust-as-image
 
-pub fn array_to_image(arr: Array2<u32>) -> ImageBuffer<Luma<u32>, Vec<u32>> {
+pub fn array_to_image(arr: &Array2<u32>) -> ImageBuffer<Luma<u32>, Vec<u32>> {
     assert!(arr.is_standard_layout());
 
     let (height, width) = arr.dim();
+    let arr = arr.clone();
     let raw = arr.into_raw_vec();
 
     ImageBuffer::<Luma<u32>, Vec<u32>>::from_raw(width as u32, height as u32, raw)
         .expect("container should have the right size for the image dimensions")
 } 
 
-pub fn get_connected_from_arr(arr: Array2<u32>, l: u16) -> (HashMap<u32, usize>, Array2<u32>) {
+pub fn get_connected_from_arr(arr: &Array2<u32>, l: u16) -> (HashMap<u32, usize>, Array2<u32>) {
 
     let image = array_to_image(arr);
     let background_color = Luma([0u32]);
@@ -77,9 +79,46 @@ pub fn get_connected_from_arr(arr: Array2<u32>, l: u16) -> (HashMap<u32, usize>,
 
 }
 
-pub fn get_spark_avg_yield(arr: Array2<u32>, l: u16, prob_arr: Array2::<f64>) ->  f64 {
+pub fn sample_random_indices(arr: &Array2<u32>, l: &u16, n: usize) -> Vec<(usize, usize)> {
 
-    let total_trees = &arr.sum();
+    let mut sampled_indices = Vec::new();
+
+    for _ in 0..n {
+
+        let random_index = get_sample_index(arr, l);
+        sampled_indices.push(random_index);
+    }
+
+    return sampled_indices;
+}
+
+pub fn get_sample_index(arr: &Array2::<u32>, l: &u16) -> (usize, usize) {
+
+    let mut matches =  Vec::new();
+
+    for (i_test, j_test) in iproduct!(0..*l, 0..*l){
+        
+        if arr[[i_test as usize, j_test as usize]] == 0 {
+
+            matches.push((i_test as usize, j_test as usize))
+
+    
+        }
+
+    }
+
+        let num = rand::thread_rng().gen_range(0..matches.len());
+
+    return matches[num as usize]
+    
+    
+
+}
+
+pub fn get_spark_avg_yield(arr: &Array2<u32>, l: u16, prob_arr: &Array2::<f64>) ->  f64 {
+
+    //let arr = arr.clone();
+    let total_trees = arr.sum();
     let (mut comp_size_hash, labeled_arr) = get_connected_from_arr(arr, l);
     let mut burn_square = Array2::<f64>::zeros((l as usize, l as usize));
 
@@ -120,7 +159,7 @@ pub fn get_spark_avg_yield(arr: Array2<u32>, l: u16, prob_arr: Array2::<f64>) ->
 
     let burn_prob = burn_square*prob_arr;
 
-    return (*total_trees as f64)/(l as f64*l as f64) - burn_prob.sum()/(l as f64*l as f64)
+    return (total_trees as f64)/(l as f64*l as f64) - burn_prob.sum()/(l as f64*l as f64)
 }
 
 

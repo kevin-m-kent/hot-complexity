@@ -37,7 +37,6 @@ fn main() {
       }
       starting_arr[[win_i as usize, win_j as usize]] = 1;
       density = (starting_arr.sum() as f64)/(l as f64*l as f64);
-      //println!("yield:{}, density: {}", max_yield, density);
       densities.push(density);
       yields.push(max_yield);
         
@@ -45,18 +44,9 @@ fn main() {
    let s1 = Series::new("densities", &densities);
    let s2 = Series::new("yields", &yields);
    let mut df: PolarsResult<DataFrame> = DataFrame::new(vec![s1, s2]);
-
-
    let mut file = std::fs::File::create(format!("Data/run_d{}_l{}.csv", &D, &l)).unwrap();
    CsvWriter::new(&mut file).finish(&mut df.unwrap()).unwrap();
    let duration = start.elapsed();
-   println!("Time elapsed is: {:?}", duration);
-
-   //let (mut comp_size_hash, labeled_arr) = get_connected_from_arr(starting_arr, l);
-   //let test_yield = get_spark_avg_yield(&starting_arr, l, prob_array);
-   //let random_indices = sample_random_indices(&starting_arr, &l, 3);
-   //println!("avg_burn: {:?}", test_yield);
-   //println!("final arr: {:?}", starting_arr);
-   //println!("df: {:?}", df);
+   println!("Time elapsed is: {:?}", duration)
 
 }

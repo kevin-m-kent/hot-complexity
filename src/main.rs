@@ -3,8 +3,10 @@ use make_spark::*;
 use std::env;
 use ndarray::{Array2};
 use polars::prelude::*;
+use std::time::{Duration, Instant};
 
 fn main() {
+   let start = Instant::now();
    let args: Vec<String> = env::args().collect();
    let l = args[1].parse::<u16>().unwrap();
    let D = args[2].parse::<u16>().unwrap();
@@ -45,8 +47,10 @@ fn main() {
    let mut df: PolarsResult<DataFrame> = DataFrame::new(vec![s1, s2]);
 
 
-   let mut file = std::fs::File::create(format!("Data/run_{}_{}.csv", &D, &l)).unwrap();
+   let mut file = std::fs::File::create(format!("Data/run_d{}_l{}.csv", &D, &l)).unwrap();
    CsvWriter::new(&mut file).finish(&mut df.unwrap()).unwrap();
+   let duration = start.elapsed();
+   println!("Time elapsed is: {:?}", duration);
 
    //let (mut comp_size_hash, labeled_arr) = get_connected_from_arr(starting_arr, l);
    //let test_yield = get_spark_avg_yield(&starting_arr, l, prob_array);

@@ -162,4 +162,46 @@ pub fn get_spark_avg_yield(arr: &Array2<u32>, l: u16, prob_arr: &Array2::<f64>) 
     return (total_trees as f64)/(l as f64*l as f64) - burn_prob.sum()/(l as f64*l as f64)
 }
 
+pub fn run_simulation(d: &u16, l: &u16) {
+
+    let prob_array = make_probability_array(&l);
+    let mut density = 0.0;
+    let mut starting_arr = Array2::<u32>::zeros((l as usize, l as usize));
+    let mut densities = Vec::new();
+    let mut yields = Vec::new();
+    for k in 0..(&l*&l) {
+ 
+       let sampled_indexes = sample_random_indices(&starting_arr, &l, d as usize);
+       let  (mut win_i, mut win_j, mut max_yield) = (0, 0, 0.0);
+       for idx in sampled_indexes {
+ 
+          starting_arr[[idx.0 as usize, idx.1 as usize]] = 1;
+          let avg_yield = get_spark_avg_yield(&starting_arr, l, &prob_array);
+          if avg_yield > max_yield {
+ 
+             max_yield = avg_yield;
+             win_i = idx.0;
+             win_j = idx.1;
+ 
+          }
+ 
+ 
+          starting_arr[[idx.0 as usize, idx.1 as usize]]  = 0;
+ 
+       }
+       starting_arr[[win_i as usize, win_j as usize]] = 1;
+       density = (starting_arr.sum() as f64)/(l as f64*l as f64);
+       densities.push(density);
+       yields.push(max_yield);
+         
+    }
+    let s1 = Series::new("densities", &densities);
+    let s2 = Series::new("yields", &yields);
+    let mut df: PolarsResult<DataFrame> = DataFrame::new(vec![s1, s2]);
+    let mut file = std::fs::File::create(format!("Data/run_d{}_l{}.csv", d, l)).unwrap();
+    CsvWriter::new(&mut file).finish(&mut df.unwrap()).unwrap();
+
+
+}
+
 
